@@ -25,7 +25,10 @@ async function run() {
     const userCollection = client.db("Orbit").collection("users");
     const taskCollection = client.db("Orbit").collection("task");
     
-    
+    app.get("/users", async (req, res) => {
+      const users = await userCollection.find({}).toArray();
+      res.send(users);
+    });
     
     
   } finally {
