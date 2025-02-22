@@ -84,11 +84,6 @@ Orbit Task Management is a modern web application designed to help users manage 
 
 ### 🎉 You’re all set! Open `http://localhost:5173/` in your browser to see the app in action.
 
-## 🤝 Contributing
-Feel free to fork the repository, create a feature branch, and submit a pull request!
-
-## 📄 License
-This project is licensed under the MIT License.
 
 ---
 Enjoy using **Orbit Task Management**! 🚀
