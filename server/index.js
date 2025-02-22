@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
-
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -24,16 +23,19 @@ async function run() {
     const userCollection = client.db("Orbit").collection("users");
     const taskCollection = client.db("Orbit").collection("task");
 
+    // Get all users
     app.get("/users", async (req, res) => {
       const users = await userCollection.find({}).toArray();
       res.send(users);
     });
 
+    // Get all tasks sorted by order
     app.get("/tasks", async (req, res) => {
       const tasks = await taskCollection.find({}).sort({ order: 1 }).toArray();
       res.send(tasks);
     });
     
+    // Update order and category for tasks (drag and drop)
     app.put("/tasks/update-order", async (req, res) => {
       const { tasks } = req.body;
       console.log(tasks);
@@ -72,8 +74,66 @@ async function run() {
         res.status(500).json({ error: "Internal Server Error" });
       }
     });
+
+    // Add a new task
+    app.post("/tasks", async (req, res) => {
+      try {
+        const { uid, title, description, category, order, createdAt } = req.body;
+        if (!uid || !title || !description || !category || order === undefined || !createdAt) {
+          return res.status(400).json({ error: "Missing required fields" });
+        }
+  
+        const newTask = { uid, title, description, category, order, createdAt };
+        const result = await taskCollection.insertOne(newTask);
+        res.json({ message: "Task added successfully", taskId: result.insertedId });
+      } catch (error) {
+        console.error("Failed to add task:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    // Update (edit) an existing task
+    app.put("/tasks/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const { title, description, category } = req.body;
+        if (!title || !description || !category) {
+          return res.status(400).json({ error: "Missing required fields" });
+        }
+  
+        const result = await taskCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { title, description, category } }
+        );
+  
+        if (result.modifiedCount === 1) {
+          res.json({ message: "Task updated successfully" });
+        } else {
+          res.status(404).json({ error: "Task not found or no changes made" });
+        }
+      } catch (error) {
+        console.error("Failed to update task:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    // Delete a task
+    app.delete("/tasks/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await taskCollection.deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 1) {
+          res.json({ message: "Task deleted successfully" });
+        } else {
+          res.status(404).json({ error: "Task not found" });
+        }
+      } catch (error) {
+        console.error("Failed to delete task:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
   } finally {
-    // Optional: Uncomment to close the client after operations
+    // Uncomment the next line to close the connection after operations if needed
     // await client.close();
   }
 }
