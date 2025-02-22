@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react"
 import AuthContext from "../../Provider/AuthContext"
 import { Link } from "react-router"
+import axios from "axios"
 
 const Navbar = () => {
     const [theme, setTheme] = useState("light")
@@ -47,6 +48,18 @@ const Navbar = () => {
             if (result.user) {
                 console.log(`helleo ${result.user.displayName}`)
             }
+
+            const userInfo = {
+                name: result.user.displayName,
+                uid: result.user.uid,
+                email: result.user.email,
+            }
+
+            const res = await axios.post('https://orbit-server-kappa.vercel.app/users', userInfo);
+            if(res.data.insertedId) {
+                console.log('User added to database');
+            }
+            
         } catch (error) {
             setLoading(false)
             console.error(error)

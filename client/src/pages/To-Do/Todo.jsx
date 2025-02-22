@@ -31,7 +31,7 @@ const Todo = () => {
   const { data: tasks } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/tasks/${user.uid}`);
+      const res = await axios.get(`https://orbit-server-kappa.vercel.app/tasks/${user.uid}`);
       return res.data;
     },
   });
@@ -103,7 +103,7 @@ const Todo = () => {
         : [...updatedSourceList, ...updatedDestinationList];
 
     try {
-      await axios.put("http://localhost:5000/tasks/update-order", {
+      await axios.put("https://orbit-server-kappa.vercel.app/tasks/update-order", {
         tasks: updatedTasks.map(({ _id, order, category }) => ({
           _id,
           order,
@@ -133,7 +133,7 @@ const Todo = () => {
     };
 
     try {
-      await axios.post("http://localhost:5000/tasks", newTask);
+      await axios.post("https://orbit-server-kappa.vercel.app/tasks", newTask);
       queryClient.invalidateQueries(["tasks"]);
       setIsAddModalVisible(false);
       addForm.resetFields();
@@ -161,7 +161,7 @@ const Todo = () => {
 
   const handleEditTask = async (values) => {
     try {
-      await axios.put(`http://localhost:5000/tasks/${currentTask._id}`, {
+      await axios.put(`https://orbit-server-kappa.vercel.app/tasks/${currentTask._id}`, {
         title: values.title,
         description: values.description,
         category: values.category,
@@ -179,7 +179,7 @@ const Todo = () => {
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
     try {
-      await axios.delete(`http://localhost:5000/tasks/${taskId}`);
+      await axios.delete(`https://orbit-server-kappa.vercel.app/tasks/${taskId}`);
       queryClient.invalidateQueries(["tasks"]);
     } catch (error) {
       console.error("Failed to delete task:", error);
