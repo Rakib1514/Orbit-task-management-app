@@ -4,7 +4,8 @@ import AuthContext from "../../Provider/AuthContext"
 const Navbar = () => {
     const [theme, setTheme] = useState("light")
 
-    const { signInWithGoogle, user, setLoading } = useContext(AuthContext)
+    const { signInWithGoogle, user, setLoading, userSignOut } =
+        useContext(AuthContext)
 
     useEffect(() => {
         // Check if a theme is already stored in localStorage
@@ -38,20 +39,27 @@ const Navbar = () => {
         document.documentElement.setAttribute("data-theme", newTheme)
         localStorage.setItem("theme", newTheme)
     }
-    
-    const handleSignIn =async() => {
+
+    const handleSignIn = async () => {
         try {
             const result = await signInWithGoogle()
-            if(result.user){
-                console.log(`helleo ${result.user.displayName}`);
+            if (result.user) {
+                console.log(`helleo ${result.user.displayName}`)
             }
         } catch (error) {
             setLoading(false)
             console.error(error)
-        }finally{
+        } finally {
             // btn loading need to add
         }
-        
+    }
+
+    const handleSignOut = async () => {
+        try {
+            await userSignOut()
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (
@@ -61,7 +69,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleSignIn}
-                        className={`btn transition-scale flex items-center gap-2 rounded-sm border border-gray-400 px-4 py-2 duration-200 hover:scale-[1.02] active:scale-100 dark:border-gray-600 cursor-pointer ${user && "hidden"}`}
+                        className={`btn transition-scale flex cursor-pointer items-center gap-2 rounded-sm border border-gray-400 px-4 py-2 duration-200 hover:scale-[1.02] active:scale-100 dark:border-gray-600 ${user && "hidden"}`}
                     >
                         <svg
                             aria-label="Google logo"
@@ -93,6 +101,14 @@ const Navbar = () => {
                         Login with Google
                     </button>
                     <p>{user && user.displayName}</p>
+                    {user && (
+                        <button
+                            onClick={handleSignOut}
+                            className="btn transition-scale flex cursor-pointer items-center gap-2 rounded-sm border border-gray-400 px-4 py-2 duration-200 hover:scale-[1.02] active:scale-100 dark:border-gray-600"
+                        >
+                            sign out
+                        </button>
+                    )}
                     <button onClick={toggleTheme}>
                         {/* Sun icon */}
                         <svg

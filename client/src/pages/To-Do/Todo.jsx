@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -31,7 +31,7 @@ const Todo = () => {
   const { data: tasks } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await axios.get("http://localhost:5000/tasks");
+      const res = await axios.get(`http://localhost:5000/tasks/${user.uid}`);
       return res.data;
     },
   });
@@ -201,7 +201,7 @@ const Todo = () => {
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className="min-h-[300px] flex-1 rounded-md bg-gray-100 p-4"
+                  className="min-h-[300px] flex-1 rounded-md border border-gray-500 p-4"
                 >
                   <h3 className="mb-2 text-center capitalize">
                     {columnId === "inprogress" ? "In Progress" : columnId}
@@ -217,7 +217,7 @@ const Todo = () => {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className="mb-2 flex items-center justify-between cursor-grab rounded-md border bg-white p-4"
+                          className="mb-2 flex items-center justify-between cursor-grab rounded-md border border-gray-500 p-4"
                         >
                           <div className="flex items-center space-x-4">
                             <span>{item.order + 1}</span>
