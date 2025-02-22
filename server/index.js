@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb"); 
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const dotenv = require("dotenv");
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -30,11 +30,16 @@ async function run() {
     });
 
     // Get all tasks sorted by order
-    app.get("/tasks", async (req, res) => {
-      const tasks = await taskCollection.find({}).sort({ order: 1 }).toArray();
+    app.get("/tasks/:uid", async (req, res) => {
+      const { uid } = req.params;
+      const tasks = await taskCollection
+        .find({ uid })
+        .sort({ order: 1 })
+        .toArray();
+
       res.send(tasks);
     });
-    
+
     // Update order and category for tasks (drag and drop)
     app.put("/tasks/update-order", async (req, res) => {
       const { tasks } = req.body;
@@ -43,31 +48,35 @@ async function run() {
         if (!tasks || !Array.isArray(tasks)) {
           return res.status(400).json({ error: "Invalid data format" });
         }
-  
-        const bulkOps = tasks.map((task) => {
-          if (
-            !task._id ||
-            typeof task.order !== "number" ||
-            typeof task.category !== "string"
-          ) {
-            console.error("Invalid task format:", task);
-            return null;
-          }
-          return {
-            updateOne: {
-              filter: { _id: new ObjectId(task._id) },
-              update: { $set: { order: task.order, category: task.category } },
-            },
-          };
-        }).filter(Boolean);
-  
+
+        const bulkOps = tasks
+          .map((task) => {
+            if (
+              !task._id ||
+              typeof task.order !== "number" ||
+              typeof task.category !== "string"
+            ) {
+              console.error("Invalid task format:", task);
+              return null;
+            }
+            return {
+              updateOne: {
+                filter: { _id: new ObjectId(task._id) },
+                update: {
+                  $set: { order: task.order, category: task.category },
+                },
+              },
+            };
+          })
+          .filter(Boolean);
+
         if (bulkOps.length === 0) {
           return res.status(400).json({ error: "No valid tasks to update" });
         }
-  
+
         const result = await taskCollection.bulkWrite(bulkOps);
         console.log("Updated tasks:", result);
-  
+
         res.json({ message: "Order and category updated successfully" });
       } catch (error) {
         console.error("Failed to update tasks:", error);
@@ -78,14 +87,25 @@ async function run() {
     // Add a new task
     app.post("/tasks", async (req, res) => {
       try {
-        const { uid, title, description, category, order, createdAt } = req.body;
-        if (!uid || !title || !description || !category || order === undefined || !createdAt) {
+        const { uid, title, description, category, order, createdAt } =
+          req.body;
+        if (
+          !uid ||
+          !title ||
+          !description ||
+          !category ||
+          order === undefined ||
+          !createdAt
+        ) {
           return res.status(400).json({ error: "Missing required fields" });
         }
-  
+
         const newTask = { uid, title, description, category, order, createdAt };
         const result = await taskCollection.insertOne(newTask);
-        res.json({ message: "Task added successfully", taskId: result.insertedId });
+        res.json({
+          message: "Task added successfully",
+          taskId: result.insertedId,
+        });
       } catch (error) {
         console.error("Failed to add task:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -100,12 +120,12 @@ async function run() {
         if (!title || !description || !category) {
           return res.status(400).json({ error: "Missing required fields" });
         }
-  
+
         const result = await taskCollection.updateOne(
           { _id: new ObjectId(id) },
           { $set: { title, description, category } }
         );
-  
+
         if (result.modifiedCount === 1) {
           res.json({ message: "Task updated successfully" });
         } else {
@@ -121,7 +141,9 @@ async function run() {
     app.delete("/tasks/:id", async (req, res) => {
       try {
         const { id } = req.params;
-        const result = await taskCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await taskCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
         if (result.deletedCount === 1) {
           res.json({ message: "Task deleted successfully" });
         } else {
