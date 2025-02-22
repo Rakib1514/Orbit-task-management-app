@@ -4,7 +4,7 @@ import AuthContext from "../../Provider/AuthContext"
 const Navbar = () => {
     const [theme, setTheme] = useState("light")
 
-    const { signInWithGoogle, user } = useContext(AuthContext)
+    const { signInWithGoogle, user, setLoading } = useContext(AuthContext)
 
     useEffect(() => {
         // Check if a theme is already stored in localStorage
@@ -38,6 +38,21 @@ const Navbar = () => {
         document.documentElement.setAttribute("data-theme", newTheme)
         localStorage.setItem("theme", newTheme)
     }
+    
+    const handleSignIn =async() => {
+        try {
+            const result = await signInWithGoogle()
+            if(result.user){
+                console.log(`helleo ${result.user.displayName}`);
+            }
+        } catch (error) {
+            setLoading(false)
+            console.error(error)
+        }finally{
+            // btn loading need to add
+        }
+        
+    }
 
     return (
         <header>
@@ -45,8 +60,8 @@ const Navbar = () => {
                 <p className="text-3xl font-semibold uppercase">orbit</p>
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={signInWithGoogle}
-                        className="btn transition-scale flex items-center gap-2 rounded-sm border border-gray-400 px-4 py-2 duration-200 hover:scale-[1.02] active:scale-100 dark:border-gray-600"
+                        onClick={handleSignIn}
+                        className={`btn transition-scale flex items-center gap-2 rounded-sm border border-gray-400 px-4 py-2 duration-200 hover:scale-[1.02] active:scale-100 dark:border-gray-600 cursor-pointer ${user && "hidden"}`}
                     >
                         <svg
                             aria-label="Google logo"
@@ -77,6 +92,7 @@ const Navbar = () => {
                         </svg>
                         Login with Google
                     </button>
+                    <p>{user && user.displayName}</p>
                     <button onClick={toggleTheme}>
                         {/* Sun icon */}
                         <svg
