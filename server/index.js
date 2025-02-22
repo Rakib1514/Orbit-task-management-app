@@ -75,7 +75,6 @@ async function run() {
         }
 
         const result = await taskCollection.bulkWrite(bulkOps);
-        console.log("Updated tasks:", result);
 
         res.json({ message: "Order and category updated successfully" });
       } catch (error) {
@@ -153,6 +152,19 @@ async function run() {
         console.error("Failed to delete task:", error);
         res.status(500).json({ error: "Internal Server Error" });
       }
+    });
+
+    app.post("/users", async (req, res) => {
+      const userInfo = req.body;
+
+      const exist = await userCollection.findOne({ uid: userInfo.uid });
+      if (exist) {
+        res.status(400).json({ error: "User already exists" });
+        return;
+      }
+
+      const result = await userCollection.insertOne(userInfo);
+      res.send(result);
     });
   } finally {
     // Uncomment the next line to close the connection after operations if needed
