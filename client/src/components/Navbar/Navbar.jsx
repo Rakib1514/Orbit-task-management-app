@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react"
 import AuthContext from "../../Provider/AuthContext"
+import { Link } from "react-router"
 
 const Navbar = () => {
     const [theme, setTheme] = useState("light")
@@ -65,7 +66,7 @@ const Navbar = () => {
     return (
         <header>
             <nav className="container mx-auto flex items-center justify-between px-4 py-4">
-                <p className="text-3xl font-semibold uppercase">orbit</p>
+                <Link to={'/'}><p className="text-3xl font-semibold uppercase">orbit</p></Link>
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleSignIn}
